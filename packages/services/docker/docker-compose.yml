@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+  # systems
+  proxy:
+    container_name: proxy
+    image: traefix
+    networks:
+      games:
+        ipv4_address: 192.168.3.10
+      systems:
+        ipv4_address: 192.168.2.100
+    ports:
+      - target: 12000 # games/pal-world/game
+        publish: 12000
+        protocol: udp
+        mode: host
+      - target: 12001 # games/pal-world/rcon
+        publish: 12001
+        protocol: udp
+        mode: host
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: ./proxy/storage
+        target: /etc/traefik
+
+  # games
+  pal-world:
+    container_name: pal-world
+    environment:
+      - PORT=8211
+      - PLAYERS=30
+      - MULTITHREADING=true
+      - COMMUNIty=false
+    image: thijsvanloef/palworld-server-docker
+    networks:
+      games:
+        ipv4_address: 192.168.3.100
+    ports:
+      - target: 8211 # game
+        publish: 8211
+        protocol: udp
+        mode: host
+      - target: 27015 # rcon
+        publish: 27015
+        protocol: udp
+        mode: host
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: ./pal-world/storage
+        target: /palworld
+
+networks:
+  games:
+    ipam:
+      config:
+        - subnet: "192.168.3.0/24"
+      name: games
+
+  systems:
+    ipam:
+      config:
+        - subnet: "192.168.2.0/24"
+      name: systems
