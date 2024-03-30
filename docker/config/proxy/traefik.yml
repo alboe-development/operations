@@ -64,4 +64,3 @@ tcp:
         - "minecraft-java-test-rcon"
       rule: "HostSNI(`*`)"
       service: "minecraft-java-test-rcon"
-
