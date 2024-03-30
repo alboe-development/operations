@@ -1,4 +1,4 @@
-version: '3'
+nversion: '3'
 
 services:
   # systems
@@ -11,20 +11,20 @@ services:
       systems:
         ipv4_address: 192.168.2.100
     ports:
-      - target: 12010 # games/minecraft-java/game
+      - target: 12000 # games/minecraft-java/game
+        published: 12000
+        protocol: tcp
+        mode: host
+      - target: 12001 # games/minecraft-java/rcon
+        published: 12001
+        protocol: tcp
+        mode: host
+      - target: 12010 # games/minecraft-java-test/game
         published: 12010
         protocol: tcp
         mode: host
-      - target: 12011 # games/minecraft-java/rcon
+      - target: 12011 # games/minecraft-java-test/rcon
         published: 12011
-        protocol: tcp
-        mode: host
-      - target: 12020 # games/minecraft-java-test/game
-        published: 12020
-        protocol: tcp
-        mode: host
-      - target: 12021 # games/minecraft-java-test/rcon
-        published: 12021
         protocol: tcp
         mode: host
     restart: unless-stopped
@@ -38,7 +38,7 @@ services:
     build:
       args:
         - MINECRAFT_VERSION_NUMBER=1.20.4
-        - PAPER_BUILD_NUMBER=463
+        - PAPER_BUILD_NUMBER=397
         - EULA=true
       context: ./images/minecraft-java
       dockerfile: Dockerfile
@@ -46,19 +46,10 @@ services:
     environment:
       - MEMORY_MAX=4G
       - MEMORY_MIN=2G
-    image: minecraft-java:1.20.4-paper.463
+    image: minecraft-java:1.20.4-paper.397
     networks:
       games:
         ipv4_address: 192.168.3.100
-    ports:
-      - target: 25565 # minecraft-java
-        published: 25565
-        protocol: tcp
-        mode: host
-      - target: 25575 # minecraft-java-rcon
-        published: 25575
-        protocol: tcp
-        mode: host
     restart: unless-stopped
     volumes:
       - type: bind
@@ -81,15 +72,6 @@ services:
     networks:
       games:
         ipv4_address: 192.168.3.101
-    ports:
-      - target: 25565 # minecraft-java-test
-        published: 25565
-        protocol: tcp
-        mode: host
-      - target: 25575 # minecraft-java-rcon-test
-        published: 25575
-        protocol: tcp
-        mode: host
     restart: unless-stopped
     volumes:
       - type: bind
