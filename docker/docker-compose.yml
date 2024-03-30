@@ -11,14 +11,6 @@ services:
       systems:
         ipv4_address: 192.168.2.100
     ports:
-      - target: 12000 # games/pal-world/game
-        published: 12000
-        protocol: udp
-        mode: host
-      - target: 12001 # games/pal-world/rcon
-        published: 12001
-        protocol: udp
-        mode: host
       - target: 12010 # games/minecraft-java/game
         published: 12010
         protocol: tcp
@@ -57,7 +49,7 @@ services:
     image: minecraft-java:1.20.4-paper.397
     networks:
       games:
-        ipv4_address: 192.168.3.101
+        ipv4_address: 192.168.3.100
     ports:
       - target: 25565 # minecraft-java
         published: 25565
@@ -88,7 +80,7 @@ services:
     image: minecraft-java:1.20.4-paper.463
     networks:
       games:
-        ipv4_address: 192.168.3.102
+        ipv4_address: 192.168.3.101
     ports:
       - target: 25565 # minecraft-java-test
         published: 25565
@@ -103,32 +95,6 @@ services:
       - type: bind
         source: ./storage/minecraft-java-test
         target: /minecraft
-
-  pal-world:
-    container_name: pal-world
-    environment:
-      - PORT=8211
-      - PLAYERS=30
-      - MULTITHREADING=false
-      - COMMUNIty=false
-    image: thijsvanloef/palworld-server-docker
-    networks:
-      games:
-        ipv4_address: 192.168.3.100
-    ports:
-      - target: 8211 # game
-        published: 8211
-        protocol: udp
-        mode: host
-      - target: 27015 # rcon
-        published: 27015
-        protocol: udp
-        mode: host
-    restart: unless-stopped
-    volumes:
-      - type: bind
-        source: ./storage/pal-world
-        target: /palworld
 
 networks:
   games:

@@ -7,44 +7,38 @@ providers:
 
 entryPoints:
   minecraft-java-game:
-    address: ":12010/tcp"
+    address: ":12000/tcp"
 
   minecraft-java-rcon:
-    address: ":12011/tcp"
+    address: ":12001/tcp"
 
   minecraft-java-test-game:
-    address: ":12020/tcp"
+    address: ":12010/tcp"
 
   minecraft-java-test-rcon:
-    address: ":12021/tcp"
-
-  pal-world-game:
-    address: ":12000/udp"
-
-  pal-world-rcon:
-    address: ":12001/udp"
+    address: ":12011/tcp"
 
 tcp:
   services:
     minecraft-java-game:
       loadBalancer:
         servers:
-          - address: "192.168.3.101:25565"
+          - address: "192.168.3.100:25565"
 
     minecraft-java-rcon:
       loadBalancer:
         servers:
-          - address: "192.168.3.101:25575"
+          - address: "192.168.3.100:25575"
 
     minecraft-java-test-game:
       loadBalancer:
         servers:
-          - address: "192.168.3.102:25565"
+          - address: "192.168.3.101:25565"
 
     minecraft-java-test-rcon:
       loadBalancer:
         servers:
-          - address: "192.168.3.102:25575"
+          - address: "192.168.3.101:25575"
 
   routers:
     minecraft-java-game:
@@ -71,24 +65,3 @@ tcp:
       rule: "HostSNI(`*`)"
       service: "minecraft-java-test-rcon"
 
-udp:
-  services:
-    pal-world-game:
-      loadBalancer:
-        servers:
-          - address: "192.168.3.100:8211"
-
-    pal-world-rcon:
-      loadBalancer:
-        servers:
-          - address: "192.168.3.100:27015"
-
-  routers:
-    pal-world-game:
-      entryPoints:
-        - "pal-world-game"
-      service: "pal-world-game"
-
-    pal-world-rcon:
-      entryPoints:
-        - "pal-world-rcon"
