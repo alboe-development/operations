@@ -1,0 +1,94 @@
+log:
+  level: DEBUG
+
+providers:
+  file:
+    directory: /etc/traefik
+
+entryPoints:
+  minecraft-java-game:
+    address: ":12010/tcp"
+
+  minecraft-java-rcon:
+    address: ":12011/tcp"
+
+  minecraft-java-test-game:
+    address: ":12020/tcp"
+
+  minecraft-java-test-rcon:
+    address: ":12021/tcp"
+
+  pal-world-game:
+    address: ":12000/udp"
+
+  pal-world-rcon:
+    address: ":12001/udp"
+
+tcp:
+  services:
+    minecraft-java-game:
+      loadBalancer:
+        servers:
+          - address: "192.168.3.101:25565"
+
+    minecraft-java-rcon:
+      loadBalancer:
+        servers:
+          - address: "192.168.3.101:25575"
+
+    minecraft-java-test-game:
+      loadBalancer:
+        servers:
+          - address: "192.168.3.102:25565"
+
+    minecraft-java-test-rcon:
+      loadBalancer:
+        servers:
+          - address: "192.168.3.102:25575"
+
+  routers:
+    minecraft-java-game:
+      entryPoints:
+        - "minecraft-java-game"
+      rule: "HostSNI(`*`)"
+      service: "minecraft-java-game"
+
+    minecraft-java-rcon:
+      entryPoints:
+        - "minecraft-java-rcon"
+      rule: "HostSNI(`*`)"
+      service: "minecraft-java-rcon"
+
+    minecraft-java-test-game:
+      entryPoints:
+        - "minecraft-java-test-game"
+      rule: "HostSNI(`*`)"
+      service: "minecraft-java-test-game"
+
+    minecraft-java-test-rcon:
+      entryPoints:
+        - "minecraft-java-test-rcon"
+      rule: "HostSNI(`*`)"
+      service: "minecraft-java-test-rcon"
+
+udp:
+  services:
+    pal-world-game:
+      loadBalancer:
+        servers:
+          - address: "192.168.3.100:8211"
+
+    pal-world-rcon:
+      loadBalancer:
+        servers:
+          - address: "192.168.3.100:27015"
+
+  routers:
+    pal-world-game:
+      entryPoints:
+        - "pal-world-game"
+      service: "pal-world-game"
+
+    pal-world-rcon:
+      entryPoints:
+        - "pal-world-rcon"
