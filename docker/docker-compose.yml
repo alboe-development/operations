@@ -38,7 +38,7 @@ services:
     build:
       args:
         - MINECRAFT_VERSION_NUMBER=1.20.4
-        - PAPER_BUILD_NUMBER=397
+        - PAPER_BUILD_NUMBER=463
         - EULA=true
       context: ./images/minecraft-java
       dockerfile: Dockerfile
@@ -46,7 +46,7 @@ services:
     environment:
       - MEMORY_MAX=4G
       - MEMORY_MIN=2G
-    image: minecraft-java:1.20.4-paper.397
+    image: minecraft-java:1.20.4-paper.463
     networks:
       games:
         ipv4_address: 192.168.3.100
