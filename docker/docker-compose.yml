@@ -27,6 +27,10 @@ services:
         published: 12011
         protocol: tcp
         mode: host
+      - target: 12012 # games/minecraft-java-test/map
+        published: 12012
+        protocol: tcp
+        mode: host
     restart: unless-stopped
     volumes:
       - type: bind

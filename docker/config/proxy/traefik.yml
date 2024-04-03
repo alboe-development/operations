@@ -18,6 +18,21 @@ entryPoints:
   minecraft-java-test-rcon:
     address: ":12011/tcp"
 
+  minecraft-java-test-map:
+    address: ":12012/tcp"
+
+http:
+  routers:
+    minecraft-java-test-map:
+      entryPoints:
+        - "minecraft-java-test-map"
+      service: "minecraft-java-test-map"
+
+  services:
+    minecraft-java-test-map:
+      loadBalancer:
+        - url: "http://0.0.0.0:8100"
+
 tcp:
   services:
     minecraft-java-game:
