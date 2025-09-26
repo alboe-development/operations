@@ -1,9 +1,0 @@
-{
-  "name": "@alboe-operations/docker-service",
-  "scripts": {
-    "initialize": "yarn initialize:pal-world && yarn initialize:proxy",
-    "initialize:pal-world": "./pal-world/initialize.sh",
-    "initialize:proxy": "./proxy/initialize.sh",
-    "start": "./start.sh"
-  }
-}
