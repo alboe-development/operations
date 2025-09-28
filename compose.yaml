@@ -13,7 +13,6 @@ services:
 
   proxy:
     container_name: proxy
-    user: "${PUID}:${PGID}"
     image: traefik
     command: --configFile=/config/config.yaml
     restart: unless-stopped
@@ -41,7 +40,6 @@ services:
 
   dns:
     container_name: dns
-    user: "${PUID}:${PGID}"
     image: ubuntu/bind9
     restart: unless-stopped
     environment:
@@ -66,7 +64,6 @@ services:
 
   ddns:
     container_name: ddns
-    user: "${PUID}:${PGID}"
     image: favonia/cloudflare-ddns
     restart: unless-stopped
     networks:
@@ -83,7 +80,6 @@ services:
 
   vpn:
     container_name: vpn
-    user: "${PUID}:${PGID}"
     image: linuxserver/wireguard
     restart: unless-stopped
     networks:
@@ -104,10 +100,10 @@ services:
       - ALLOWEDIPS=0.0.0.0/0
     volumes:
       - type: bind
-        source: ./vpn/shared/config
+        source: ${STORAGE}/vpn/config
         target: /config
       - type: bind
-        source: ./vpn/cache/modules
+        source: ${STORAGE}/vpn/modules
         target: /lib/modules
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
@@ -119,7 +115,6 @@ services:
 
   share:
     image: stonith404/pingvin-share
-    user: "${PUID}:${PGID}"
     container_name: share
     restart: unless-stopped
     environment:

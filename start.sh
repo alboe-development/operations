@@ -1,6 +1,6 @@
-export GUID=$(id -g)
+export PGID=$(id -g)
 export PUID=$(id -u)
-export STORAGE="./services"
+export STORAGE="./storage"
 
 docker compose up \
   --detach
