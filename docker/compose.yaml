@@ -1,0 +1,183 @@
+name: alboe
+
+###
+# The ALBOE services definition.
+###
+
+services:
+
+###
+# Network Systems Infrastructure - nsi
+# Subnet - 172.18.1.0/24
+###
+
+  nsi-proxy:
+    container_name: nsi-proxy
+    image: traefik
+    command: --configFile=/config/config.yaml
+    restart: unless-stopped
+    environment:
+      - CF_DNS_API_TOKEN=${NSI_PROXY_TOKEN_CF_API}
+    networks:
+      systems:
+        ipv4_address: 172.18.1.10
+    ports:
+      - "53:53/tcp" # nsi/dns/tcp
+      - "53:53/udp" # nsi/dns/udp
+      - "80:80/tcp" # nsi/proxy/http
+      - "443:443/tcp" # nsi/proxy/https
+      - "50000:50000/udp" # nsi/vpn
+    volumes:
+      - ${STORAGE}/nsi/proxy/config.yaml:/config/config.yaml
+      - ${STORAGE}/nsi/proxy/logs:/logs
+      - ${STORAGE}/nsi/proxy/certs:/certs
+
+  nsi-dns:
+    container_name: nsi-dns
+    image: ubuntu/bind9
+    restart: unless-stopped
+    environment:
+      - BIND9_USER=root
+      - TZ=UTC
+    networks:
+      systems:
+        ipv4_address: 172.18.1.20
+    volumes:
+      - ${STORAGE}/nsi/dns/zones:/etc/bind/zones
+      - ${STORAGE}/nsi/dns/named.conf:/etc/bind/named.conf
+      - ${STORAGE}/nsi/dns/cache:/var/cache/bind
+      - ${STORAGE}/nsi/dns/records:/var/lib/bind
+
+  nsi-ddns:
+    container_name: nsi-ddns
+    image: favonia/cloudflare-ddns
+    restart: unless-stopped
+    networks:
+      systems:
+        ipv4_address: 172.18.1.30
+    read_only: true
+    cap_drop: [all]
+    security_opt: [no-new-privileges:true]
+    environment:
+      - CLOUDFLARE_API_TOKEN=${NSI_DDNS_TOKEN_CF_API}
+      - DOMAINS=${NSI_DDNS_DOMAINS}
+      - IP6_PROVIDER=none
+      - PROXIED=true
+
+  nsi-vpn:
+    container_name: nsi-vpn
+    image: linuxserver/wireguard
+    restart: unless-stopped
+    networks:
+      systems:
+        ipv4_address: 172.18.1.40
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PEERS=${NSI_VPN_PEERS}
+      - PEERDNS=172.16.1.10
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - SERVERURL=${SNI_VPN_HOST}
+      - SERVERPORT=50000
+      - TZ=${COMMON_TZ}
+      - INTERNAL_SUBNET=${SNI_VPN_SUBNET}
+      - ALLOWEDIPS=0.0.0.0/0
+    volumes:
+      - ${STORAGE}/sni/vpn/config:/config
+      - ${STORAGE}/sni/vpn/modules:/lib/modules
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+
+
+###
+# Web Application Layer - wal
+# Subnet - 172.18.2.0/24
+###
+
+  wal-share:
+    container_name: wal-share
+    image: stonith404/pingvin-share
+    restart: unless-stopped
+    networks:
+      systems:
+        ipv4_address: 172.18.2.10
+    environment:
+      - TRUST_PROXY=true
+    volumes:
+      - ${STORAGE}/wal/share/data:/opt/app/backend/data
+      - ${STORAGE}/wal/share/images:/opt/app/frontend/public/img
+      - ${STORAGE}/wal/share/config.yaml:/opt/app/config.yaml
+
+
+###
+# Virtualized Development Machine - vdm
+# IP Range - 172.18.3.0/24
+###
+
+  vdm-0:
+    build:
+      context: ./context/vdm
+      dockerfile: dockerfile
+    image: vdm
+    container_name: vdm-0
+    hostname: vdm-0
+    restart: unless-stopped
+    networks:
+      systems:
+        ipv4_address: 172.18.3.10
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: "2048M"
+    environment:
+      - PUBLIC_KEY=${VDM_0_PUBLIC_KEY}
+      - TZ=${COMMON_TZ}
+      - USER_NAME=${VDMA_USER_NAME}
+    volumes:
+      - ${STORAGE}/vdm/vdm-0:/home
+
+
+###
+# Game Server Group - gsg
+# IP Range - 172.18.4.0/24
+###
+
+  gsg-enshrouded:
+    container_name: gsg-enshrouded
+    image: mornedhels/enshrouded-server:latest
+    restart: unless-stopped
+    networks:
+      systems:
+        ipv4_address: 172.18.4.10
+    environment:
+      - BACKUP_MAX_COUNT=16
+      - RESTART_CRON=0 12 * * *
+      - RESTART_CHECK_PLAYERS=true
+      - SERVER_NAME=Alboe
+      - SERVER_ROLE_0_NAME=Admins
+      - SERVER_ROLE_0_PASSWORD=${GSG_ENSHROUDED_ADMIN_PASS}
+      - SERVER_ROLE_0_CAN_KICK_BAN=true
+      - SERVER_ROLE_0_CAN_ACCESS_INVENTORIES=true
+      - SERVER_ROLE_0_CAN_EDIT_WORLD=true
+      - SERVER_ROLE_0_CAN_EDIT_BASE=true
+      - SERVER_ROLE_0_CAN_EXTEND_BASE=true
+      - SERVER_ROLE_0_RESERVED_SLOTS=1
+      - UPDATE_CRON=*/30 * * * *
+      - PRESET=Survival
+      - PUID=4711
+      - PGID=4711
+    volumes:
+      - ${STORAGE}/gsg/enshrouded:/opt/enshrouded
+
+
+
+networks:
+  systems:
+    name: systems
+    external: false
+    ipam:
+      config:
+        - subnet: "172.18.0.0/16"
