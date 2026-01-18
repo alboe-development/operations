@@ -26,6 +26,7 @@ services:
       - "53:53/udp" # nsi/dns/udp
       - "80:80/tcp" # nsi/proxy/http
       - "443:443/tcp" # nsi/proxy/https
+      - "15637:15637/udp" # gsg/enshrouded
       - "50000:50000/udp" # nsi/vpn
     volumes:
       - ${STORAGE}/nsi/proxy/config.yaml:/config/config.yaml
@@ -79,14 +80,14 @@ services:
       - PEERDNS=172.16.1.10
       - PGID=${PGID}
       - PUID=${PUID}
-      - SERVERURL=${SNI_VPN_HOST}
+      - SERVERURL=${NSI_VPN_HOST}
       - SERVERPORT=50000
       - TZ=${COMMON_TZ}
-      - INTERNAL_SUBNET=${SNI_VPN_SUBNET}
+      - INTERNAL_SUBNET=${NSI_VPN_SUBNET}
       - ALLOWEDIPS=0.0.0.0/0
     volumes:
-      - ${STORAGE}/sni/vpn/config:/config
-      - ${STORAGE}/sni/vpn/modules:/lib/modules
+      - ${STORAGE}/nsi/vpn/config:/config
+      - ${STORAGE}/nsi/vpn/modules:/lib/modules
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
 
@@ -119,8 +120,8 @@ services:
   vdm-0:
     build:
       context: ./context/vdm
-      dockerfile: dockerfile
-    image: vdm
+      dockerfile: Dockerfile
+    image: alboe/vdm
     container_name: vdm-0
     hostname: vdm-0
     restart: unless-stopped
@@ -135,7 +136,7 @@ services:
     environment:
       - PUBLIC_KEY=${VDM_0_PUBLIC_KEY}
       - TZ=${COMMON_TZ}
-      - USER_NAME=${VDMA_USER_NAME}
+      - USER_NAME=${VDM_0_USER_NAME}
     volumes:
       - ${STORAGE}/vdm/vdm-0:/home
 
